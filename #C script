@@ -1,0 +1,49 @@
+using UnityEngine;
+
+public class AimAssist : MonoBehaviour
+{
+    public Transform target;       // The target enemy's transform
+    public float dragPercentage = 0.7f; // The percentage to drag upwards (70% of the distance to the head)
+    public float aimSpeed = 5f;    // The speed at which the aim adjusts
+
+    private Vector3 originalAimPosition;
+
+    void Update()
+    {
+        if (Input.GetButtonDown("Fire1")) // Assuming "Fire1" is the fire button
+        {
+            AimAtTarget();
+        }
+    }
+
+    void AimAtTarget()
+    {
+        if (target == null)
+            return;
+
+        // Calculate the position to aim at (70% upwards from the original position)
+        originalAimPosition = transform.position;
+        Vector3 targetHeadPosition = target.position + Vector3.up * dragPercentage;
+
+        // Start coroutine to smoothly adjust aim
+        StartCoroutine(SmoothAim(targetHeadPosition));
+    }
+
+    System.Collections.IEnumerator SmoothAim(Vector3 targetPosition)
+    {
+        float elapsedTime = 0f;
+        Vector3 startPosition = transform.position;
+
+        while (elapsedTime < aimSpeed)
+        {
+            // Smoothly interpolate between the original and target positions
+            transform.position = Vector3.Lerp(startPosition, targetPosition, (elapsedTime / aimSpeed));
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        // Ensure final position is exactly the target position
+        transform.position = targetPosition;
+    }
+}
